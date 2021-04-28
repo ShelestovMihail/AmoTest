@@ -7,6 +7,7 @@ class IntegrationConfigService
     public static function set($config)
     {
         array_pop($config);
+        $config = array_map('trim', $config);
         $result = json_encode($config);
         file_put_contents(__DIR__ . '/../../integrationConfig.json', $result);
     }

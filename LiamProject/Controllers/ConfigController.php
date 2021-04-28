@@ -5,8 +5,8 @@ use LiamProject\Models\IntegrationConfigService;
 
 class ConfigController
 {
-    public function setIntegrationConfig(array $configData)
+    public function setIntegrationConfig()
     {
-        IntegrationConfigService::set($configData);
+        IntegrationConfigService::set($_POST);
     }
 }

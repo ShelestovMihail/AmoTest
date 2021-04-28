@@ -2,32 +2,35 @@
 require_once 'autoload.php';
 
 use LiamProject\Controllers\MainController;
-use LiamProject\Exceptions\EmptyRefreshToken;
+use LiamProject\Exceptions\ExpiredRefreshTokenException;
 use LiamProject\Controllers\ConfigController;
-use LiamProject\Exceptions\EmptyAccessToken;
+use LiamProject\Exceptions\ExpiredAccessTokenException;
+use LiamProject\Exceptions\EmptyTokensException;
+
+ini_set("xdebug.var_display_max_children", -1);
+ini_set("xdebug.var_display_max_data", -1);
+ini_set("xdebug.var_display_max_depth", -1);
 
 session_start();
-$controller = new MainController();
+
+try {
+    $controller = new MainController();
+    $controller->checkAccessToken();
+} catch (ExpiredAccessTokenException $e) {
+    $controller->refreshToken();
+} catch (ExpiredRefreshTokenException | EmptyTokensException $e) {
+    $controller->addAccessToken();
+    $controller->viewButton();
+    return;
+}
 
 if (!empty($_POST['setConfig'])) {
     $configController = new ConfigController();
-    $configController->setIntegrationConfig($_POST);
+    $configController->setIntegrationConfig();
 }
 
-if (!empty($_POST['newContacts'])) {
-    $controller->addContacts();
+if (!empty($_POST['newEntities'])) {
+    $controller->addEntities();
 }
 
-try {
-    $controller->checkAccessToken();
-} catch (EmptyAccessToken $e) {
-    try {
-        $controller->getAccessToken();
-    } catch (EmptyRefreshToken $e) {
-        $controller->viewButton();
-        return;
-    }
-}
-
-var_dump($_SESSION);
 $controller->viewPage();

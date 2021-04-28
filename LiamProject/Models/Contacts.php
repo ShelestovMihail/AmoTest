@@ -2,62 +2,62 @@
 
 namespace LiamProject\Models;
 
-
-use Exception;
-
 class Contacts
 {
-    public static function addContacts($config) //сейчас работает только на получение контактов
+    private $createdContacts; //массив с id
+
+    public function addContacts($config, $accessToken, $count)
     {
-        $link = 'https://' . $config['subdomain'] . '.amocrm.ru/api/v4/contacts?limit=10'; //Формируем URL для запроса
-        /** Получаем access_token из вашего хранилища */
-        $access_token = $_COOKIE['access_token'];
-        /** Формируем заголовки */
+        $link = 'https://' . $config['subdomain'] . '.amocrm.ru/api/v4/contacts'; //Формируем URL для запроса
         $headers = [
-            'Authorization: Bearer ' . $access_token
+            'Authorization: Bearer ' . $accessToken,
+            'Content-Type: application/json',
         ];
 
-        $data = [
-            'name' => 'testName',
-            'first_name' => 'Simon',
-        ];
-        /**
-         * Нам необходимо инициировать запрос к серверу.
-         * Воспользуемся библиотекой cURL (поставляется в составе PHP).
-         * Вы также можете использовать и кроссплатформенную программу cURL, если вы не программируете на PHP.
-         */
-        $curl = curl_init(); //Сохраняем дескриптор сеанса cURL
-        /** Устанавливаем необходимые опции для сеанса cURL  */
-        curl_setopt($curl, CURLOPT_RETURNTRANSFER, true);
-        curl_setopt($curl, CURLOPT_USERAGENT, 'amoCRM-oAuth-client/1.0');
-        curl_setopt($curl, CURLOPT_URL, $link);
-        curl_setopt($curl, CURLOPT_HTTPHEADER, $headers);
-        curl_setopt($curl, CURLOPT_HEADER, false);
-        curl_setopt($curl, CURLOPT_SSL_VERIFYPEER, 1);
-        curl_setopt($curl, CURLOPT_SSL_VERIFYHOST, 2);
-        $out = curl_exec($curl); //Инициируем запрос к API и сохраняем ответ в переменную
-        $code = curl_getinfo($curl, CURLINFO_HTTP_CODE);
-        curl_close($curl);
-        /** Теперь мы можем обработать ответ, полученный от сервера. Это пример. Вы можете обработать данные своим способом. */
-        $code = (int)$code;
-        $errors = [
-            400 => 'Bad request',
-            401 => 'Unauthorized',
-            403 => 'Forbidden',
-            404 => 'Not found',
-            500 => 'Internal server error',
-            502 => 'Bad gateway',
-            503 => 'Service unavailable',
-        ];
-
-        try {
-            /** Если код ответа не успешный - возвращаем сообщение об ошибке  */
-            if ($code < 200 || $code > 204) {
-                throw new Exception(isset($errors[$code]) ? $errors[$code] : 'Undefined error', $code);
-            }
-        } catch (Exception $e) {
-            die('Ошибка: ' . $e->getMessage() . PHP_EOL . 'Код ошибки: ' . $e->getCode());
+        for ($i = 0; $i < $count; $i++) {
+            $data[] = ['first_name' => 'Имя номер ' . $i, 'last_name' => 'Фамилия номер ' . $i];
         }
-        $_SESSION['contactOut'] = $out;
+
+        CurlService::init();
+        CurlService::setOpt();
+        CurlService::setLink($link);
+        CurlService::setMethod('POST');
+        CurlService::setHeaders($headers);
+        CurlService::setData($data);
+        $out = CurlService::exec();
+        CurlService::close();
+
+        $response = (json_decode($out, true));
+
+        foreach ($response['_embedded']['contacts'] as $contact) {
+            $this->createdContacts[] = $contact['id'];
+        }
+    }
+
+    public function addLinksToCompanies($config, $accessToken, $companiesId)
+    {
+        $link = 'https://' . $config['subdomain'] . '.amocrm.ru/api/v4/contacts/link'; //Формируем URL для запроса
+        $headers = [
+            'Authorization: Bearer ' . $accessToken,
+            'Content-Type: application/json',
+        ];
+
+        $companiesId = array_flip($companiesId);
+        foreach ($this->createdContacts as $contactId) {
+            $data[] = [
+                "entity_id" => $contactId,
+                "to_entity_id" => array_rand($companiesId),
+                "to_entity_type" => "companies",
+            ];
+        }
+
+        CurlService::init();
+        CurlService::setOpt();
+        CurlService::setLink($link);
+        CurlService::setMethod('POST');
+        CurlService::setHeaders($headers);
+        CurlService::setData($data);
+        $out = CurlService::exec();
+        CurlService::close();
     }
 }

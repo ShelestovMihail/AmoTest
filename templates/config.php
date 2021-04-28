@@ -1,4 +1,4 @@
-<form action="index.php" method="post">
+<form action="setConfig" method="post">
     <label>Id Интеграции: <input type="text" name="integrationId" value="<?= $integrationId ?? 'integration id' ?>"></label>
     <label>Субдомен: <input type="text" name="subdomain" value="<?= $subdomain ?? ' subdomain' ?>"></label>
     <label>Secret Key: <input type="text" name="secretKey" value="<?= $secretKey ?? 'secret key' ?>"></label>

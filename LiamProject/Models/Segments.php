@@ -4,9 +4,16 @@ namespace LiamProject\Models;
 
 class Segments extends AmocrmEntity
 {
-    public function getSegmentById($id): ?array
+    protected function setEntityName(): string
     {
-        $api = "/api/v4/customers/segments/$id";
-        return $this->queryToAmo($api);
+        return 'customers/segments';
+    }
+
+    public function getEntityById($id): ?array
+    {
+        $api = "/api/v4/customers/$this->entityName/$id";
+        $response =  $this->queryToAmo($api);
+        $this->foundedElement = $response;
+        return $response;
     }
 }

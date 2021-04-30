@@ -1,9 +1,15 @@
 <?php
+
 namespace LiamProject\Models;
 
 
 class Account extends AmocrmEntity
 {
+    protected function setEntityName(): string
+    {
+        return 'account';
+    }
+
     public function checkCustomersMode()
     {
         $api = '/api/v4/account';

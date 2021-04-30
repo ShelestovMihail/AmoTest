@@ -4,6 +4,11 @@ namespace LiamProject\Models;
 
 class Leads extends AmocrmEntity
 {
+    protected function setEntityName(): string
+    {
+        return 'leads';
+    }
+
     private array $createdLeads;
 
     public function getCreatedLids(): array
@@ -11,13 +16,6 @@ class Leads extends AmocrmEntity
         return $this->createdLeads;
     }
 
-    public function getLeadById($id): ?array
-    {
-        $api = "/api/v4/leads/$id";
-
-        return $this->queryToAmo($api);
-
-    }
 
     public function addLeads($count): array
     {
@@ -31,7 +29,7 @@ class Leads extends AmocrmEntity
             ];
         }
 
-        $response = $this->queryToAmo($api, $data);
+        $response = $this->queryToAmo($api, 'POST', $data);
 
         $this->createdLeads = $response['_embedded']['leads'];
         return $this->createdLeads;
@@ -62,7 +60,7 @@ class Leads extends AmocrmEntity
             }
         }
 
-        return $this->queryToAmo($api, $data);
+        return $this->queryToAmo($api, 'POST', $data);
     }
 
     public function addLinksToCompanies($companies): array
@@ -83,6 +81,6 @@ class Leads extends AmocrmEntity
             ];
         }
 
-        return $this->queryToAmo($api, $data);
+        return $this->queryToAmo($api, 'POST', $data);
     }
 }

@@ -1,13 +1,12 @@
 <?php
+
 namespace LiamProject\Models;
 
 
 class Catalogs extends AmocrmEntity
 {
-    public function getCatalogById($id): ?array
+    protected function setEntityName(): string
     {
-        $api = "/api/v4/catalogs/$id";
-
-        return $this->queryToAmo($api);
+        return 'catalogs';
     }
 }

@@ -4,19 +4,16 @@ namespace LiamProject\Models;
 
 class Contacts extends AmocrmEntity
 {
+    protected function setEntityName(): string
+    {
+        return 'contacts';
+    }
+
     private array $createdContacts;
 
     public function getCreatedContacts(): array
     {
         return $this->createdContacts;
-    }
-
-    public function getContactById($id): ?array
-    {
-        $api = "/api/v4/contacts/$id";
-
-        return $this->queryToAmo($api);
-
     }
 
     public function addContacts($count): array
@@ -25,16 +22,16 @@ class Contacts extends AmocrmEntity
 
         $data = [];
         for ($i = 1; $i <= $count; $i++) {
-            $data["contact{$i}"] = ['first_name' => 'Имя номер ' . $i, 'last_name' => 'Фамилия номер ' . $i];
+            $data["contact$i"] = ['first_name' => 'Имя номер ' . $i, 'last_name' => 'Фамилия номер ' . $i];
         }
 
-        $response = $this->queryToAmo($api, $data);
+        $response = $this->queryToAmo($api, 'POST', $data);
 
         $responseContacts = $response['_embedded']['contacts'];
         $contactsId = [];
         $num = 1;
         foreach ($responseContacts as $contact) {
-            $contactsId["contact{$num}"] = ['id' => $contact['id']];
+            $contactsId["contact$num"] = ['id' => $contact['id']];
             $num++;
         }
 
@@ -51,6 +48,7 @@ class Contacts extends AmocrmEntity
             $companiesId[] = $company['id'];
         }
 
+        $data = [];
         foreach ($this->createdContacts as $contact) {
             $data[] = [
                 "entity_id" => $contact['id'],
@@ -59,10 +57,10 @@ class Contacts extends AmocrmEntity
             ];
         }
 
-        return $this->queryToAmo($api, $data, 'POST');
+        return $this->queryToAmo($api, 'POST', $data);
     }
 
-    public function fillMultiselectField($field)
+    public function fillMultiselectField($field): ?array
     {
         $api = '/api/v4/contacts';
 
@@ -83,6 +81,6 @@ class Contacts extends AmocrmEntity
             $data[] = $contact;
         }
 
-        return $this->queryToAmo($api, $data, 'PATCH');
+        return $this->queryToAmo($api, 'PATCH', $data);
     }
 }

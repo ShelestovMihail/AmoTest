@@ -5,29 +5,28 @@ namespace LiamProject\Models;
 
 class Companies extends AmocrmEntity
 {
-    private $createdCompanies;
-
-    public function getCreatedCompanies()
+    protected function setEntityName(): string
     {
-        return $this->createdCompanies;
+        return 'companies';
     }
 
-    public function getCompanyById($id): ?array
-    {
-        $api = "/api/v4/companies/$id";
+    private array $createdCompanies;
 
-        return $this->queryToAmo($api);
+    public function getCreatedCompanies(): array
+    {
+        return $this->createdCompanies;
     }
 
     public function addCompanies($count)
     {
         $api = '/api/v4/companies';
 
+        $data = [];
         for ($i = 1; $i <= $count; $i++) {
             $data[] = ['name' => 'ООО Компания №  ' . $i];
         }
 
-        $response = $this->queryToAmo($api, $data);
+        $response = $this->queryToAmo($api, 'POST', $data);
         $this->createdCompanies = $response['_embedded']['companies'];
         return $this->createdCompanies;
     }

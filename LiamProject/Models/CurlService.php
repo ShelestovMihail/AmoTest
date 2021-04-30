@@ -50,39 +50,11 @@ class CurlService
     public static function exec()
     {
         $out = curl_exec(static::$curl);
-        static::checkErrors($out);
         return $out;
     }
 
     public static function close()
     {
         curl_close(static::$curl);
-    }
-
-    private static function checkErrors($out)
-    {
-        $code = curl_getinfo(static::$curl, CURLINFO_HTTP_CODE);
-        $code = (int)$code;
-        $errors = [
-            400 => 'Bad request',
-            401 => 'Unauthorized',
-            403 => 'Forbidden',
-            404 => 'Not found',
-            500 => 'Internal server error',
-            502 => 'Bad gateway',
-            503 => 'Service unavailable',
-        ];
-
-        try
-        {
-            /** Если код ответа не успешный - возвращаем сообщение об ошибке  */
-            if ($code < 200 || $code > 204) {
-                throw new Exception($errors[$code] ?? 'Undefined error', $code);
-            }
-        }
-        catch(Exception $e)
-        {
-            return;
-        }
     }
 }

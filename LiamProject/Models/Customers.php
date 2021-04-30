@@ -5,18 +5,16 @@ namespace LiamProject\Models;
 
 class Customers extends AmocrmEntity
 {
-    public array $createdCustomers;
-
-    public function getCreatedCustomers(): array
+    protected function setEntityName(): string
     {
-        return $this->createdCustomers;
+        return 'customers';
     }
 
-    public function getCustomerById($id): ?array
-    {
-        $api = "/api/v4/customers/$id";
+    public array $createdCustomers;
 
-        return $this->queryToAmo($api);
+    public function getCreatedCustomers(): ?array
+    {
+        return $this->createdCustomers;
     }
 
     public function addCustomers($count)
@@ -32,12 +30,12 @@ class Customers extends AmocrmEntity
             ];
         }
 
-        $response = $this->queryToAmo($api, $data);
+        $response = $this->queryToAmo($api, 'POST', $data);
         $this->createdCustomers = $response['_embedded']['customers'];
         return $this->createdCustomers;
     }
 
-    public function addLinksToContacts($contacts)
+    public function addLinksToContacts($contacts): ?array
     {
         $api = '/api/v4/customers/link';
 
@@ -62,19 +60,19 @@ class Customers extends AmocrmEntity
             }
         }
 
-        return $this->queryToAmo($api, $data);
+        return $this->queryToAmo($api, 'POST', $data);
     }
 
-    public function addLinksToCompanies($companies)
+    public function addLinksToCompanies($companies): ?array
     {
         $api = '/api/v4/customers/link';
 
         $companiesId = [];
-        $data = [];
         foreach ($companies as $company) {
             $companiesId[] = $company['id'];
         }
 
+        $data = [];
         foreach ($this->createdCustomers as $customer) {
             $data[] = [
                 "entity_id" => $customer['id'],
@@ -83,6 +81,6 @@ class Customers extends AmocrmEntity
             ];
         }
 
-        return $this->queryToAmo($api, $data);
+        return $this->queryToAmo($api, 'POST', $data);
     }
 }

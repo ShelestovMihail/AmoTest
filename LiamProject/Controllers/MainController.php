@@ -2,14 +2,19 @@
 
 namespace LiamProject\Controllers;
 
+use LiamProject\Exceptions\UserNotFoundException;
 use LiamProject\Exceptions\WrongEntityIdException;
 use LiamProject\Models\Account;
+use LiamProject\Models\AmocrmEntity;
 use LiamProject\Models\Catalogs;
 use LiamProject\Models\Companies;
 use LiamProject\Models\Customers;
 use LiamProject\Models\CustomFields;
 use LiamProject\Models\Leads;
+use LiamProject\Models\Notes;
 use LiamProject\Models\Segments;
+use LiamProject\Models\Tasks;
+use LiamProject\Models\Users;
 use LiamProject\Views\MainView;
 use LiamProject\Models\Tokens;
 use LiamProject\Models\IntegrationConfigService;
@@ -71,39 +76,83 @@ class MainController
 
     public function setValueToEntityField($entityId, $fieldValue)
     {
+        $field = new CustomFields();
         $entity = $this->getEntityWithCustomFieldById($entityId);
-        var_dump($entity);
 
+        $field = $field->getOneTextTypeFieldId($entity->getEntityName());
+
+        $entity->setCustomField($field, $fieldValue);
     }
 
-    public function getEntityWithCustomFieldById($entityId): object
+    public function setNoteToEntity($entityId, $noteType)
+    {
+        $note = new Notes();
+        $entity = $this->getNotableEntitiesById($entityId);
+
+        $note->setNoteToEntityById($entity, $noteType);
+    }
+
+    public function setTaskToEntity($completeTill, $taskText, $responsibleUserId, $entityId)
+    {
+        $task = new Tasks();
+        $user = new Users();
+        if ($responsibleUserId !== '') {
+            try {
+                $user->getUserIdById($responsibleUserId);
+            } catch (UserNotFoundException $e) {
+                $this->viewPage($e->getMessage());
+                die();
+            }
+        }
+        $entity = $this->getNotableEntitiesById($entityId);
+
+        $task->addTaskToEntity($completeTill, $taskText, $responsibleUserId, $entity);
+    }
+
+    public function completeTask($taskId)
+    {
+        $task = new Tasks();
+
+        $task->completeTaskById($taskId);
+    }
+
+    protected function getNotableEntitiesById($entityId): ?AmocrmEntity
     {
         $lead = new Leads();
-        $entity = $lead->getLeadById($entityId);
+        $entity = $lead->getEntityById($entityId);
         if ($entity !== null) {
             return $lead;
         }
 
         $contact = new Contacts();
-        $entity = $contact->getContactById($entityId);
+        $entity = $contact->getEntityById($entityId);
         if ($entity !== null) {
             return $contact;
         }
 
         $company = new Companies();
-        $entity = $company->getCompanyById($entityId);
+        $entity = $company->getEntityById($entityId);
         if ($entity !== null) {
             return $company;
         }
 
         $customer = new Customers();
-        $entity = $customer->getCustomerById($entityId);
+        $entity = $customer->getEntityById($entityId);
         if ($entity !== null) {
             return $customer;
         }
+        throw new WrongEntityIdException('Сущности с таким id не существует');
+    }
+
+    public function getEntityWithCustomFieldById($entityId): AmocrmEntity
+    {
+        $entity = $this->getNotableEntitiesById($entityId);
+        if ($entity !== null) {
+            return $entity;
+        }
 
         $catalog = new Catalogs();
-        $entity = $catalog->getCatalogById($entityId);
+        $entity = $catalog->getEntityById($entityId);
         if ($entity !== null) {
             return $catalog;
         }
@@ -111,12 +160,12 @@ class MainController
         $account = new Account();
         if ($account->checkCustomersMode() == 'segments') {
             $segment = new Segments();
-            $entity = $segment->getSegmentById($entityId);
+            $entity = $segment->getEntityById($entityId);
             if ($entity !== null) {
                 return $segment;
             }
         }
-        throw new WrongEntityIdException('Ошибка id');
+        throw new WrongEntityIdException('Сущности с таким id не существует');
     }
 
     public function viewPage($error = '')

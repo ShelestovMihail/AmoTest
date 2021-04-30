@@ -1,41 +1,34 @@
 <?php
+
 namespace LiamProject\Models;
 
 
-class Companies
+class Companies extends AmocrmEntity
 {
-    private $createdCompanies; //массив с id
+    private $createdCompanies;
 
-    public function getCreatedCompaniesId()
+    public function getCreatedCompanies()
     {
         return $this->createdCompanies;
     }
 
-    public function addCompanies($config, $accessToken, $count)
+    public function getCompanyById($id): ?array
     {
-        $link = 'https://' . $config['subdomain'] . '.amocrm.ru/api/v4/companies'; //Формируем URL для запроса
-        $headers = [
-            'Authorization: Bearer ' . $accessToken,
-            'Content-Type: application/json',
-        ];
+        $api = "/api/v4/companies/$id";
 
-        for($i = 0; $i < $count; $i++) {
-            $data[] = ['name' => 'ООО Название номер ' . $i];
+        return $this->queryToAmo($api);
+    }
+
+    public function addCompanies($count)
+    {
+        $api = '/api/v4/companies';
+
+        for ($i = 1; $i <= $count; $i++) {
+            $data[] = ['name' => 'ООО Компания №  ' . $i];
         }
 
-        CurlService::init();
-        CurlService::setOpt();
-        CurlService::setLink($link);
-        CurlService::setMethod('POST');
-        CurlService::setHeaders($headers);
-        CurlService::setData($data);
-        $out = CurlService::exec();
-        CurlService::close();
-
-        $response = (json_decode($out, true));
-
-        foreach ($response['_embedded']['companies'] as $company) {
-            $this->createdCompanies[] = $company['id'];
-        }
+        $response = $this->queryToAmo($api, $data);
+        $this->createdCompanies = $response['_embedded']['companies'];
+        return $this->createdCompanies;
     }
 }

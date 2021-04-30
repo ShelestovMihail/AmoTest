@@ -1,45 +1,45 @@
 <?php
+
 namespace LiamProject\Models;
 
 
-class Leads extends AmocrmEntity
+class Customers extends AmocrmEntity
 {
-    private array $createdLeads;
+    public array $createdCustomers;
 
-    public function getCreatedLids(): array
+    public function getCreatedCustomers(): array
     {
-        return $this->createdLeads;
+        return $this->createdCustomers;
     }
 
-    public function getLeadById($id): ?array
+    public function getCustomerById($id): ?array
     {
-        $api = "/api/v4/leads/$id";
+        $api = "/api/v4/customers/$id";
 
         return $this->queryToAmo($api);
-
     }
 
-    public function addLeads($count): array
+    public function addCustomers($count)
     {
-        $api = '/api/v4/leads';
+        $api = '/api/v4/customers';
 
         $data = [];
-        for($i = 1; $i <= $count; $i++) {
+        for ($i = 0; $i < $count; $i++) {
             $data[] = [
-                'name' => 'Название сделки номер ' . $i,
-                'price' => rand(100, 20000)
+                'name' => 'Имя покупателя №  ' . $i,
+                'next_price' => rand(100, 20000),
+                'next_date' => (time() + (60 * 60 * 24 * rand(1, 14)))
             ];
         }
 
         $response = $this->queryToAmo($api, $data);
-
-        $this->createdLeads = $response['_embedded']['leads'];
-        return $this->createdLeads;
+        $this->createdCustomers = $response['_embedded']['customers'];
+        return $this->createdCustomers;
     }
 
-    public function addLinksToContacts($contacts): array
+    public function addLinksToContacts($contacts)
     {
-        $api = '/api/v4/leads/link';
+        $api = '/api/v4/customers/link';
 
         $contactsId = [];
         $data = [];
@@ -48,14 +48,14 @@ class Leads extends AmocrmEntity
         }
 
         $contactsId = array_flip($contactsId);
-        foreach ($this->createdLeads as $lead) {
+        foreach ($this->createdCustomers as $customer) {
 
             $contactsCount = rand(1, min(3, count($contactsId)));
             $contactsList = (array)array_rand($contactsId, $contactsCount);
 
             foreach ($contactsList as $contactId) {
                 $data[] = [
-                    "entity_id" => $lead['id'],
+                    "entity_id" => $customer['id'],
                     "to_entity_id" => $contactId,
                     "to_entity_type" => "contacts",
                 ];
@@ -65,9 +65,9 @@ class Leads extends AmocrmEntity
         return $this->queryToAmo($api, $data);
     }
 
-    public function addLinksToCompanies($companies): array
+    public function addLinksToCompanies($companies)
     {
-        $api = '/api/v4/leads/link';
+        $api = '/api/v4/customers/link';
 
         $companiesId = [];
         $data = [];
@@ -75,9 +75,9 @@ class Leads extends AmocrmEntity
             $companiesId[] = $company['id'];
         }
 
-        foreach ($this->createdLeads as $lead) {
+        foreach ($this->createdCustomers as $customer) {
             $data[] = [
-                "entity_id" => $lead['id'],
+                "entity_id" => $customer['id'],
                 "to_entity_id" => $companiesId[array_rand($companiesId)],
                 "to_entity_type" => "companies",
             ];

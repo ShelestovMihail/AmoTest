@@ -2,62 +2,87 @@
 
 namespace LiamProject\Models;
 
-class Contacts
+class Contacts extends AmocrmEntity
 {
-    private $createdContacts; //массив с id
+    private array $createdContacts;
 
-    public function addContacts($config, $accessToken, $count)
+    public function getCreatedContacts(): array
     {
-        $link = 'https://' . $config['subdomain'] . '.amocrm.ru/api/v4/contacts'; //Формируем URL для запроса
-        $headers = [
-            'Authorization: Bearer ' . $accessToken,
-            'Content-Type: application/json',
-        ];
-
-        for ($i = 0; $i < $count; $i++) {
-            $data[] = ['first_name' => 'Имя номер ' . $i, 'last_name' => 'Фамилия номер ' . $i];
-        }
-
-        CurlService::init();
-        CurlService::setOpt();
-        CurlService::setLink($link);
-        CurlService::setMethod('POST');
-        CurlService::setHeaders($headers);
-        CurlService::setData($data);
-        $out = CurlService::exec();
-        CurlService::close();
-
-        $response = (json_decode($out, true));
-
-        foreach ($response['_embedded']['contacts'] as $contact) {
-            $this->createdContacts[] = $contact['id'];
-        }
+        return $this->createdContacts;
     }
 
-    public function addLinksToCompanies($config, $accessToken, $companiesId)
+    public function getContactById($id): ?array
     {
-        $link = 'https://' . $config['subdomain'] . '.amocrm.ru/api/v4/contacts/link'; //Формируем URL для запроса
-        $headers = [
-            'Authorization: Bearer ' . $accessToken,
-            'Content-Type: application/json',
-        ];
+        $api = "/api/v4/contacts/$id";
 
-        $companiesId = array_flip($companiesId);
-        foreach ($this->createdContacts as $contactId) {
+        return $this->queryToAmo($api);
+
+    }
+
+    public function addContacts($count): array
+    {
+        $api = '/api/v4/contacts';
+
+        $data = [];
+        for ($i = 1; $i <= $count; $i++) {
+            $data["contact{$i}"] = ['first_name' => 'Имя номер ' . $i, 'last_name' => 'Фамилия номер ' . $i];
+        }
+
+        $response = $this->queryToAmo($api, $data);
+
+        $responseContacts = $response['_embedded']['contacts'];
+        $contactsId = [];
+        $num = 1;
+        foreach ($responseContacts as $contact) {
+            $contactsId["contact{$num}"] = ['id' => $contact['id']];
+            $num++;
+        }
+
+        $this->createdContacts = array_merge_recursive($contactsId, $data);
+        return $this->createdContacts;
+    }
+
+    public function addLinksToCompanies($companies): array
+    {
+        $api = '/api/v4/contacts/link';
+        $companiesId = [];
+
+        foreach ($companies as $company) {
+            $companiesId[] = $company['id'];
+        }
+
+        foreach ($this->createdContacts as $contact) {
             $data[] = [
-                "entity_id" => $contactId,
-                "to_entity_id" => array_rand($companiesId),
+                "entity_id" => $contact['id'],
+                "to_entity_id" => $companiesId[array_rand($companiesId)],
                 "to_entity_type" => "companies",
             ];
         }
 
-        CurlService::init();
-        CurlService::setOpt();
-        CurlService::setLink($link);
-        CurlService::setMethod('POST');
-        CurlService::setHeaders($headers);
-        CurlService::setData($data);
-        $out = CurlService::exec();
-        CurlService::close();
+        return $this->queryToAmo($api, $data, 'POST');
+    }
+
+    public function fillMultiselectField($field)
+    {
+        $api = '/api/v4/contacts';
+
+        $enumsId = [];
+        foreach ($field['enums'] as $enum) {
+            $enumsId[] = ['enum_id' => $enum['id']];
+        }
+
+        $data = [];
+        foreach ($this->createdContacts as $contact) {
+            shuffle($enumsId);
+            $fieldValues = array_slice($enumsId, 0, rand(1, count($enumsId)));
+            $contact['custom_fields_values'][] =
+                [
+                    'field_id' => $field['id'],
+                    'values' => $fieldValues
+                ];
+            $data[] = $contact;
+        }
+
+        return $this->queryToAmo($api, $data, 'PATCH');
     }
 }

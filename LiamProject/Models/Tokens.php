@@ -40,6 +40,8 @@ class Tokens
         if ($this->accessToken['expireTime'] < time()) {
             throw new ExpiredAccessTokenException();
         }
+
+        $_SESSION['access_token'] = $this->accessToken['token'];
         return true;
     }
 

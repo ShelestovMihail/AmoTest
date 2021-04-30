@@ -10,6 +10,7 @@ use LiamProject\Exceptions\EmptyTokensException;
 ini_set("xdebug.var_display_max_children", -1);
 ini_set("xdebug.var_display_max_data", -1);
 ini_set("xdebug.var_display_max_depth", -1);
+header('Content-type: text/html; charset=UTF-8');
 
 session_start();
 
@@ -30,7 +31,16 @@ if (!empty($_POST['setConfig'])) {
 }
 
 if (!empty($_POST['newEntities'])) {
-    $controller->addEntities();
+    $controller->addEntities($_POST['entityCount']);
+}
+
+if (!empty($_POST['setValueToEntityField'])) {
+    try {
+        $controller->setValueToEntityField($_POST['entityId'], $_POST['fieldValue']);
+    } catch (\LiamProject\Exceptions\WrongEntityIdException $e) {
+        $controller->viewPage($e->getMessage());
+        return;
+    }
 }
 
 $controller->viewPage();

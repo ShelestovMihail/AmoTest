@@ -10,7 +10,9 @@ class CurlService
 
     public static function init()
     {
-        static::$curl = curl_init();
+        if (empty(static::$curl)) {
+            static::$curl = curl_init();
+        }
     }
 
     public static function setOpt()
@@ -39,13 +41,16 @@ class CurlService
 
     public static function setData($data)
     {
-        curl_setopt(static::$curl,CURLOPT_POSTFIELDS, json_encode($data));
+        if (is_array($data)) {
+            $data = json_encode($data);
+        }
+        curl_setopt(static::$curl,CURLOPT_POSTFIELDS, $data);
     }
 
     public static function exec()
     {
         $out = curl_exec(static::$curl);
-        static::checkErrors();
+        static::checkErrors($out);
         return $out;
     }
 
@@ -54,7 +59,7 @@ class CurlService
         curl_close(static::$curl);
     }
 
-    private static function checkErrors()
+    private static function checkErrors($out)
     {
         $code = curl_getinfo(static::$curl, CURLINFO_HTTP_CODE);
         $code = (int)$code;
@@ -77,7 +82,7 @@ class CurlService
         }
         catch(Exception $e)
         {
-            header('Location: index.php?message=' . $e->getMessage() . '&code=' . $code);
+            return;
         }
     }
 }

@@ -15,7 +15,7 @@ class Notes extends AmocrmEntity
     {
         $entityType = $entity->entityName;
         $entityId = $entity->foundedElement['id'];
-        echo $api = "/api/v4/$entityType/$entityId/notes";
+            $api = "/api/v4/$entityType/$entityId/notes";
 
         $commonParams = ['text' => 'Текст Примечания'];
         $callInParams = [
@@ -26,21 +26,13 @@ class Notes extends AmocrmEntity
             "phone" => "+79999999999"
         ];
 
-        $params = match ($noteType) {
-            'call_in' => $callInParams,
-            default => $commonParams,
-        };
+        $params = ($noteType == 'call_in') ? $callInParams : $commonParams;
 
         $data[] = [
             'note_type' => $noteType,
             "params" => $params
         ];
 
-
-        var_dump($data);
-
         $out = $this->queryToAmo($api, 'POST', $data);
-
-        var_dump($out);
     }
 }

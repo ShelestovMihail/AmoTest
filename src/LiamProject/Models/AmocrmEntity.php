@@ -3,6 +3,8 @@
 namespace LiamProject\Models;
 
 
+use LiamProject\Exceptions\UnauthorizedException;
+
 abstract class AmocrmEntity
 {
     protected string $entityName;
@@ -28,17 +30,21 @@ abstract class AmocrmEntity
     {
         $id = $this->foundedElement['id'];
 
-        $api = "/api/v4/contacts/$id";
+        $api = "/api/v4/$this->entityName/$id";
 
-        foreach ($this->foundedElement['custom_fields_values'] as &$field) {
-            if ($field['field_id'] === $fieldId) {
-                $field['values'][0]['value'] = $value;
-            }
+
+        $this->foundedElement['custom_fields_values'] = [[
+            'field_id' => $fieldId,
+            'values' => [
+                ['value' => $value]
+            ]
+        ]];
+
+        if (isset($this->foundedElement['_embedded'])) {
+            unset($this->foundedElement['_embedded']);
         }
 
-        $this->foundedElement['first_name'] = 'NE IVAN';
-
-        $out = $this->queryToAmo($api, 'PATCH', $this->foundedElement);
+        $this->queryToAmo($api, 'PATCH', $this->foundedElement);
     }
 
     public function getEntityName(): string
@@ -61,7 +67,12 @@ abstract class AmocrmEntity
         CurlService::setMethod($method);
         $out = CurlService::exec();
 
-        return json_decode($out, true);
+        $response = json_decode($out, true);
+
+        if (isset($response['status']) && $response['status'] === 401) {
+            throw new UnauthorizedException();
+        }
+        return $response;
     }
 
     private function getHeaders(): array

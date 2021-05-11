@@ -2,8 +2,6 @@
 namespace LiamProject\Models;
 
 
-use Exception;
-
 class CurlService
 {
     protected static $curl;
@@ -49,8 +47,7 @@ class CurlService
 
     public static function exec()
     {
-        $out = curl_exec(static::$curl);
-        return $out;
+         return curl_exec(static::$curl);
     }
 
     public static function close()

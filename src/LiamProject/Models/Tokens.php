@@ -9,7 +9,7 @@ class Tokens
 {
     private $accessToken;
     private $refreshToken;
-    private $pathToTokens = __DIR__ . '/../../tokens.json';
+    private $pathToTokens = __DIR__ . '/../../../tokens.json';
 
     public function __construct()
     {
@@ -20,12 +20,6 @@ class Tokens
 
         $this->accessToken = $tokens['accessToken'];
         $this->refreshToken = $tokens['refreshToken'];
-    }
-
-    public function getAccessToken(): string
-    {
-        $this->checkTokens();
-        return $this->accessToken['token'];
     }
 
     public function checkTokens(): bool
@@ -105,9 +99,14 @@ class Tokens
         CurlService::setHeaders();
         CurlService::setData($data);
         $out = CurlService::exec();
-        CurlService::close();
 
         $response = json_decode($out, true);
         $this->setAccessToken($response);
+    }
+
+    public function clearTokens()
+    {
+        unset($_SESSION['access_token']);
+        file_put_contents($this->pathToTokens, '');
     }
 }

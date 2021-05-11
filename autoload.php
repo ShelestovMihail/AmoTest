@@ -1,7 +1,7 @@
 <?php
 spl_autoload_register(function ($class) {
     $prefix = 'LiamProject\\';
-    $base_dir = __DIR__ . '/LiamProject/';
+    $base_dir = __DIR__ . '/src/LiamProject/';
     $len = strlen($prefix);
 
     if (strncmp($prefix, $class, $len) !== 0) {

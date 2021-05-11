@@ -29,9 +29,10 @@ class Tasks extends AmocrmEntity
             $data['responsible_user_id'] = $responsibleUserId;
         }
 
+
         $out = $this->queryToAmo($api, 'POST', $data);
 
-        var_dump($out)  ;
+//        var_dump($out);
     }
 
     public function completeTaskById($id)

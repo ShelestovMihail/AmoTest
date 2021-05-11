@@ -11,7 +11,7 @@ class Segments extends AmocrmEntity
 
     public function getEntityById($id): ?array
     {
-        $api = "/api/v4/customers/$this->entityName/$id";
+        $api = "/api/v4/$this->entityName/$id";
         $response =  $this->queryToAmo($api);
         $this->foundedElement = $response;
         return $response;

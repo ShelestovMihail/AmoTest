@@ -2,7 +2,6 @@
 
 namespace LiamProject\Controllers;
 
-use LiamProject\Exceptions\UserNotFoundException;
 use LiamProject\Exceptions\WrongEntityIdException;
 use LiamProject\Models\Account;
 use LiamProject\Models\AmocrmEntity;
@@ -97,12 +96,8 @@ class MainController
         $task = new Tasks();
         $user = new Users();
         if ($responsibleUserId !== '') {
-            try {
-                $user->getUserIdById($responsibleUserId);
-            } catch (UserNotFoundException $e) {
-                $this->viewPage($e->getMessage());
-                die();
-            }
+            $user->getUserIdById($responsibleUserId);
+
         }
         $entity = $this->getNotableEntitiesById($entityId);
 
@@ -112,7 +107,6 @@ class MainController
     public function completeTask($taskId)
     {
         $task = new Tasks();
-
         $task->completeTaskById($taskId);
     }
 
@@ -183,5 +177,10 @@ class MainController
     private function refreshConfig()
     {
         $this->integrationConfigData = IntegrationConfigService::getConfig();
+    }
+
+    public function clearTokens()
+    {
+        $this->token->clearTokens();
     }
 }

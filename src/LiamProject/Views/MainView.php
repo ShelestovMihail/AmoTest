@@ -7,6 +7,6 @@ class MainView
     {
         extract($vars);
 
-        include __DIR__ . '/../../templates/' . $templateName;
+        include __DIR__ . '/../../../templates/' . $templateName;
     }
 }

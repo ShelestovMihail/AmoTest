@@ -100,7 +100,7 @@ class CustomFields extends AmocrmEntity
             'sort' => 500
         ];
 
-        $response = $this->queryToAmo($api, 'POST, $data');
-        return $response['_embedded']['custom_fields']['id'];
+        $response = $this->queryToAmo($api, 'POST', $data);
+        return $response['id'];
     }
 }

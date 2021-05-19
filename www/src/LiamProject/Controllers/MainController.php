@@ -84,7 +84,7 @@ class MainController
     /**
      * @param $realCount
      */
-    public function addEntities($realCount)
+    public function addEntities(int $realCount)
     {
         for ($count = min(200, $realCount); $realCount > 0; $realCount -= $count) {
 

@@ -106,6 +106,7 @@ abstract class AmocrmEntity
         CurlService::setMethod($method);
         $this->checkQueriesPerSecond();
         $out = CurlService::exec();
+        var_dump($out);
 
         $response = json_decode($out, true);
 
@@ -132,10 +133,10 @@ abstract class AmocrmEntity
      */
     private function checkQueriesPerSecond(): void
     {
+        $lastQueryTime = microtime(true);
+        $this->queriesTimestamp[] = $lastQueryTime;
         if(count($this->queriesTimestamp) > 3) {
             $firstQueryTime = array_shift($this->queriesTimestamp);
-            $lastQueryTime = microtime(true);
-            $this->queriesTimestamp[] = $lastQueryTime;
 
             if($lastQueryTime - $firstQueryTime < 1) {
                 sleep(1);

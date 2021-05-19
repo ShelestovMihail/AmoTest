@@ -45,15 +45,15 @@ try {
 //Запросы к API
 try {
     if (!empty($_POST['newEntities'])) {
-        $controller->addEntities($_POST['entityCount']);
+        $controller->addEntities((int)$_POST['entityCount']);
     }
 
     if (!empty($_POST['setValueToEntityField'])) {
-        $controller->setValueToEntityField($_POST['entityId'], $_POST['fieldValue']);
+        $controller->setValueToEntityField((int)$_POST['entityId'], $_POST['fieldValue']);
     }
 
     if (!empty($_POST['setNoteToEntity'])) {
-        $controller->setNoteToEntity($_POST['entityId'], $_POST['noteType']);
+        $controller->setNoteToEntity((int)$_POST['entityId'], $_POST['noteType']);
     }
 
     if (!empty($_POST['setTaskToEntity'])) {
@@ -61,12 +61,12 @@ try {
             $_POST['completeTill'],
             $_POST['taskText'],
             $_POST['responsibleUserId'],
-            $_POST['entityId']
+            (int)$_POST['entityId']
         );
     }
 
     if (!empty($_POST['completeTask'])) {
-        $controller->completeTask($_POST['taskId']);
+        $controller->completeTask((int)$_POST['taskId']);
     }
 } catch (UnauthorizedException $e) {
     $controller->clearTokens();

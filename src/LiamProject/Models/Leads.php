@@ -1,22 +1,41 @@
 <?php
 namespace LiamProject\Models;
 
+use LiamProject\Exceptions\UnauthorizedException;
 
+/**
+ * Class Leads
+ * @package LiamProject\Models
+ */
 class Leads extends AmocrmEntity
 {
+    /**
+     * @return string
+     */
     protected function setEntityName(): string
     {
         return 'leads';
     }
 
+    /**
+     * @var array
+     */
     private array $createdLeads;
 
+    /**
+     * @return array
+     */
     public function getCreatedLids(): array
     {
         return $this->createdLeads;
     }
 
 
+    /**
+     * @param $count
+     * @return array
+     * @throws UnauthorizedException
+     */
     public function addLeads($count): array
     {
         $api = '/api/v4/leads';
@@ -35,6 +54,11 @@ class Leads extends AmocrmEntity
         return $this->createdLeads;
     }
 
+    /**
+     * @param $contacts
+     * @return array
+     * @throws UnauthorizedException
+     */
     public function addLinksToContacts($contacts): array
     {
         $api = '/api/v4/leads/link';
@@ -63,6 +87,11 @@ class Leads extends AmocrmEntity
         return $this->queryToAmo($api, 'POST', $data);
     }
 
+    /**
+     * @param $companies
+     * @return array
+     * @throws UnauthorizedException
+     */
     public function addLinksToCompanies($companies): array
     {
         $api = '/api/v4/leads/link';

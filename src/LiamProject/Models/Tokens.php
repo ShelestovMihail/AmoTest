@@ -41,14 +41,17 @@ class Tokens
 
     private function setAccessToken($tokenData)
     {
+        $timestamp = time();
+        define('ONE_DAY', $timestamp + 60 * 60 * 24);
+        define('ONE_MONTH', $timestamp + 60 * 60 * 24 * 30);
         $tokens = [
             'accessToken' => [
                 'token' => $tokenData['access_token'],
-                'expireTime' => (time() + $tokenData['expires_in'])
+                'expireTime' => ONE_DAY
             ],
             'refreshToken' => [
                 'token' => $tokenData['refresh_token'],
-                'expireTime' => (time() + ($tokenData['expires_in'] * 90)),
+                'expireTime' => ONE_MONTH
             ]
         ];
         file_put_contents($this->pathToTokens, json_encode($tokens));
@@ -58,7 +61,7 @@ class Tokens
     public function addAccessToken($config)
     {
         if (!empty($_GET['code'])) {
-            $link = 'https://' . $config['subdomain'] . '.amocrm.ru/oauth2/access_token'; //Формируем URL для запроса
+            $link = 'https://' . $config['subdomain'] . '.amocrm' . $config['domainZone'] . '/oauth2/access_token'; //Формируем URL для запроса
             $data = [
                 'client_id' => $config['integrationId'],
                 'client_secret' => $config['secretKey'],
@@ -74,6 +77,7 @@ class Tokens
             CurlService::setHeaders();
             CurlService::setData($data);
             $out = CurlService::exec();
+            var_dump($out);
             CurlService::close();
 
             $response = json_decode($out, true);

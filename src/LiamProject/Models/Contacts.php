@@ -1,22 +1,41 @@
 <?php
-
 namespace LiamProject\Models;
 
+use LiamProject\Exceptions\UnauthorizedException;
+
+/**
+ * Class Contacts
+ * @package LiamProject\Models
+ */
 class Contacts extends AmocrmEntity
 {
+    /**
+     * @return string
+     */
     protected function setEntityName(): string
     {
         return 'contacts';
     }
 
+    /**
+     * @var array
+     */
     private array $createdContacts;
 
+    /**
+     * @return array
+     */
     public function getCreatedContacts(): array
     {
         return $this->createdContacts;
     }
 
-    public function addContacts($count): array
+    /**
+     * @param int $count
+     * @return array
+     * @throws UnauthorizedException
+     */
+    public function addContacts(int $count): array
     {
         $api = '/api/v4/contacts';
 
@@ -39,7 +58,12 @@ class Contacts extends AmocrmEntity
         return $this->createdContacts;
     }
 
-    public function addLinksToCompanies($companies): array
+    /**
+     * @param array $companies
+     * @return array
+     * @throws UnauthorizedException
+     */
+    public function addLinksToCompanies(array $companies): array
     {
         $api = '/api/v4/contacts/link';
         $companiesId = [];
@@ -60,7 +84,12 @@ class Contacts extends AmocrmEntity
         return $this->queryToAmo($api, 'POST', $data);
     }
 
-    public function fillMultiselectField($field): ?array
+    /**
+     * @param array $field
+     * @return array|null
+     * @throws UnauthorizedException
+     */
+    public function fillMultiselectField(array $field): ?array
     {
         $api = '/api/v4/contacts';
 

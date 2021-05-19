@@ -1,23 +1,42 @@
 <?php
-
 namespace LiamProject\Models;
 
 
+use LiamProject\Exceptions\UnauthorizedException;
+
+/**
+ * Class Companies
+ * @package LiamProject\Models
+ */
 class Companies extends AmocrmEntity
 {
+    /**
+     * @return string
+     */
     protected function setEntityName(): string
     {
         return 'companies';
     }
 
+    /**
+     * @var array
+     */
     private array $createdCompanies;
 
+    /**
+     * @return array
+     */
     public function getCreatedCompanies(): array
     {
         return $this->createdCompanies;
     }
 
-    public function addCompanies($count)
+    /**
+     * @param int $count
+     * @return array|mixed
+     * @throws UnauthorizedException
+     */
+    public function addCompanies(int $count)
     {
         $api = '/api/v4/companies';
 

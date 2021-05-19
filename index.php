@@ -1,36 +1,45 @@
 <?php
-require_once 'autoload.php';
+declare(strict_types=1);
 
 use LiamProject\Controllers\MainController;
 use LiamProject\Exceptions\ExpiredRefreshTokenException;
 use LiamProject\Controllers\ConfigController;
 use LiamProject\Exceptions\ExpiredAccessTokenException;
 use LiamProject\Exceptions\EmptyTokensException;
+use LiamProject\Exceptions\UnauthorizedException;
 use LiamProject\Exceptions\UserNotFoundException;
 use LiamProject\Exceptions\WrongEntityIdException;
 
-ini_set("xdebug.var_display_max_children", -1);
-ini_set("xdebug.var_display_max_data", -1);
-ini_set("xdebug.var_display_max_depth", -1);
+ini_set("xdebug.var_display_max_children", '-1');
+ini_set("xdebug.var_display_max_data", '-1');
+ini_set("xdebug.var_display_max_depth", '-1');
+
+require_once 'autoload.php';
 
 session_start();
+$errorMessage = '';
+
+//Редактирование конфига - id интеграции, секретный ключ, субдомен
+if (!empty($_POST['setConfig'])) {
+    try {
+        $configController = new ConfigController();
+        $configController->setIntegrationConfig();
+    } catch (Exception $e) {
+        $errorMessage = $e->getMessage();
+    }
+}
+
+$controller = new MainController();
 
 //Проверка токена
 try {
-    $controller = new MainController();
     $controller->checkAccessToken();
 } catch (ExpiredAccessTokenException $e) {
     $controller->refreshToken();
 } catch (ExpiredRefreshTokenException | EmptyTokensException  $e) {
     $controller->addAccessToken();
-    $controller->viewButton();
+    $controller->viewButton($errorMessage);
     return;
-}
-
-//Редактирование конфига - id интеграции, секретный ключ, субдомен
-if (!empty($_POST['setConfig'])) {
-    $configController = new ConfigController();
-    $configController->setIntegrationConfig();
 }
 
 //Запросы к API
@@ -59,17 +68,13 @@ try {
     if (!empty($_POST['completeTask'])) {
         $controller->completeTask($_POST['taskId']);
     }
-} catch (\LiamProject\Exceptions\UnauthorizedException $e) {
+} catch (UnauthorizedException $e) {
     $controller->clearTokens();
-    $controller->viewButton();
+    $controller->viewButton($e->getMessage());
     return;
-} catch (Error $e) {
-    $controller->viewPage('Произошла фатальная ошибка: ' . $e->getMessage());
-    return;
-} catch (WrongEntityIdException | UserNotFoundException $e) {
-    $controller->viewPage($e->getMessage());
-    return;
+} catch (WrongEntityIdException | UserNotFoundException | Exception | Error $e) {
+    $errorMessage = $e->getMessage();
 }
 
 //Отрисовка страницы с формами
-$controller->viewPage();
+$controller->viewPage($errorMessage);

@@ -3,14 +3,29 @@
 namespace LiamProject\Models;
 
 use LiamProject\Exceptions\TaskNotFoundException;
+use LiamProject\Exceptions\UnauthorizedException;
 
+/**
+ * Class Tasks
+ * @package LiamProject\Models
+ */
 class Tasks extends AmocrmEntity
 {
+    /**
+     * @return string
+     */
     protected function setEntityName(): string
     {
         return 'tasks';
     }
 
+    /**
+     * @param $completeTill
+     * @param $taskText
+     * @param $responsibleUserId
+     * @param AmocrmEntity $entity
+     * @throws UnauthorizedException
+     */
     public function addTaskToEntity($completeTill, $taskText, $responsibleUserId, AmocrmEntity $entity)
     {
         $api = '/api/v4/tasks';
@@ -29,12 +44,14 @@ class Tasks extends AmocrmEntity
             $data['responsible_user_id'] = $responsibleUserId;
         }
 
-
-        $out = $this->queryToAmo($api, 'POST', $data);
-
-//        var_dump($out);
+        $this->queryToAmo($api, 'POST', $data);
     }
 
+    /**
+     * @param $id
+     * @throws TaskNotFoundException
+     * @throws UnauthorizedException
+     */
     public function completeTaskById($id)
     {
         $api = "/api/v4/tasks/$id";

@@ -1,22 +1,40 @@
 <?php
-
 namespace LiamProject\Models;
 
 
+use LiamProject\Exceptions\UnauthorizedException;
+
+/**
+ * Class CustomFields
+ * @package LiamProject\Models
+ */
 class CustomFields extends AmocrmEntity
 {
+    /**
+     * @return string
+     */
     protected function setEntityName(): string
     {
         return 'custom_fields';
     }
 
+    /**
+     * @var array|null
+     */
     private ?array $createdField;
 
+    /**
+     * @return array
+     */
     public function getCreatedField(): array
     {
         return $this->createdField;
     }
 
+    /**
+     * @return array
+     * @throws UnauthorizedException
+     */
     public function addMultiselectToContacts(): array
     {
         $api = '/api/v4/contacts/custom_fields';
@@ -48,6 +66,10 @@ class CustomFields extends AmocrmEntity
         return $this->createdField;
     }
 
+    /**
+     * @return mixed
+     * @throws UnauthorizedException
+     */
     public function getContactsCustomFields()
     {
         $api = '/api/v4/contacts/custom_fields';
@@ -56,6 +78,11 @@ class CustomFields extends AmocrmEntity
         return $response['_embedded']['custom_fields'];
     }
 
+    /**
+     * @param $entityName
+     * @return int
+     * @throws UnauthorizedException
+     */
     public function getOneTextTypeFieldId($entityName): int
     {
         $api = "/api/v4/$entityName/custom_fields";
@@ -69,7 +96,6 @@ class CustomFields extends AmocrmEntity
         }
 
         $textFieldsCount = count($textTypeFieldsId);
-        $fieldId = '';
         if ($textFieldsCount > 1) {
             $fieldId = array_shift($textTypeFieldsId);
             $this->deleteFieldsFromEntityById($entityName, $textTypeFieldsId);
@@ -82,6 +108,11 @@ class CustomFields extends AmocrmEntity
         return $fieldId;
     }
 
+    /**
+     * @param $entityName
+     * @param array $fieldsId
+     * @throws UnauthorizedException
+     */
     protected function deleteFieldsFromEntityById($entityName, array $fieldsId)
     {
         foreach ($fieldsId as $id) {
@@ -90,6 +121,11 @@ class CustomFields extends AmocrmEntity
         }
     }
 
+    /**
+     * @param $entityName
+     * @return int
+     * @throws UnauthorizedException
+     */
     protected function addTextTypeFieldToEntity($entityName):int
     {
         $api = "/api/v4/$entityName/custom_fields";

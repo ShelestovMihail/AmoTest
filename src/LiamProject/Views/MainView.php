@@ -1,9 +1,18 @@
 <?php
 namespace LiamProject\Views;
 
+/**
+ * Class MainView
+ * @package LiamProject\Views
+ */
 class MainView
 {
-    public function renderHtml($templateName, array $vars = [], $error = '')
+    /**
+     * @param $templateName
+     * @param array $vars
+     * @param string $error
+     */
+    public function renderHtml($templateName, array $vars = [], string $error = '')
     {
         extract($vars);
 

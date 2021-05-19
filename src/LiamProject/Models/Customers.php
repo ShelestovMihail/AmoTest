@@ -1,22 +1,39 @@
 <?php
-
 namespace LiamProject\Models;
 
 
+/**
+ * Class Customers
+ * @package LiamProject\Models
+ */
 class Customers extends AmocrmEntity
 {
+    /**
+     * @return string
+     */
     protected function setEntityName(): string
     {
         return 'customers';
     }
 
+    /**
+     * @var array
+     */
     public array $createdCustomers;
 
+    /**
+     * @return array|null
+     */
     public function getCreatedCustomers(): ?array
     {
         return $this->createdCustomers;
     }
 
+    /**
+     * @param $count
+     * @return array|mixed
+     * @throws \LiamProject\Exceptions\UnauthorizedException
+     */
     public function addCustomers($count)
     {
         $api = '/api/v4/customers';
@@ -35,6 +52,11 @@ class Customers extends AmocrmEntity
         return $this->createdCustomers;
     }
 
+    /**
+     * @param $contacts
+     * @return array|null
+     * @throws \LiamProject\Exceptions\UnauthorizedException
+     */
     public function addLinksToContacts($contacts): ?array
     {
         $api = '/api/v4/customers/link';
@@ -63,6 +85,11 @@ class Customers extends AmocrmEntity
         return $this->queryToAmo($api, 'POST', $data);
     }
 
+    /**
+     * @param $companies
+     * @return array|null
+     * @throws \LiamProject\Exceptions\UnauthorizedException
+     */
     public function addLinksToCompanies($companies): ?array
     {
         $api = '/api/v4/customers/link';

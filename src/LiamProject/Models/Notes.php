@@ -1,16 +1,28 @@
 <?php
-
 namespace LiamProject\Models;
 
+use LiamProject\Exceptions\UnauthorizedException;
 
+/**
+ * Class Notes
+ * @package LiamProject\Models
+ */
 class Notes extends AmocrmEntity
 {
 
+    /**
+     * @return string
+     */
     protected function setEntityName(): string
     {
         return 'notes';
     }
 
+    /**
+     * @param AmocrmEntity $entity
+     * @param $noteType
+     * @throws UnauthorizedException
+     */
     public function setNoteToEntityById(AmocrmEntity $entity, $noteType)
     {
         $entityType = $entity->entityName;
@@ -33,6 +45,6 @@ class Notes extends AmocrmEntity
             "params" => $params
         ];
 
-        $out = $this->queryToAmo($api, 'POST', $data);
+        $this->queryToAmo($api, 'POST', $data);
     }
 }
